@@ -16,10 +16,26 @@ import supplierRoutes from './routes/supplierRoutes.js';
 import purchaseRoutes from './routes/purchaseRoutes.js';
 import salesRoutes from './routes/salesRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
+import bomRoutes from './routes/bomRoutes.js';
+import batchRoutes from './routes/batchRoutes.js';
+import qualityRoutes from './routes/qualityRoutes.js';
+import costingRoutes from './routes/costingRoutes.js';
+import complianceRoutes from './routes/complianceRoutes.js';
 
 dotenv.config();
 
+// Connect to Database
+connectDB();
+
 const app = express();
+
+// CORS - Must be registered first
+app.use(
+  cors({
+    origin: true,
+    credentials: true
+  })
+);
 
 // Security
 app.use(helmet());
@@ -28,7 +44,7 @@ app.use(mongoSanitize());
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   message: {
     success: false,
     message: 'Too many requests, please try again later'
@@ -39,7 +55,7 @@ app.use('/api/', limiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 200,
   message: {
     success: false,
     message: 'Too many auth attempts, please try again later'
@@ -47,14 +63,6 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api/auth/', authLimiter);
-
-// CORS
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    credentials: true
-  })
-);
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -67,6 +75,11 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/bom', bomRoutes);
+app.use('/api/batches', batchRoutes);
+app.use('/api/quality', qualityRoutes);
+app.use('/api/costing', costingRoutes);
+app.use('/api/compliance', complianceRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -82,6 +95,10 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`TextileFlow v3 Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`TextileFlow v3 Server running on port ${PORT}`);
+  });
+}
+
+export default app;
