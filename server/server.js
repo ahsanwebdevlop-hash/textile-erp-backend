@@ -62,9 +62,21 @@ const authLimiter = rateLimit({
   }
 });
 
-app.use('/api/auth/', authLimiter);
-
 app.use(express.json({ limit: '10mb' }));
+
+// Middleware to ensure database connection is ready for every request
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database middleware error:', err.message);
+    res.status(500).json({
+      success: false,
+      message: 'Database connection timed out. Ensure MongoDB Atlas Network Access is set to 0.0.0.0/0 (Allow access from anywhere).'
+    });
+  }
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
