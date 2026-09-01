@@ -5,7 +5,8 @@ import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const JWT_SECRET = process.env.JWT_SECRET || 'a7dcaf7293f0f1ddb649fbf0d75845c1b688c8ba5990a702e8e3c5c39dada0942f941963e5ab2a2d55dd12382e2f9f9e1bb2965b36cd864ddb4dbfa445339ec6';
+const generateToken = (id) => jwt.sign({ id }, JWT_SECRET, { expiresIn: '30d' });
 
 router.post('/register',
   [
