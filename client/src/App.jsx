@@ -18,6 +18,7 @@ import BatchTracking from './pages/BatchTracking';
 import QualityControl from './pages/QualityControl';
 import GarmentCosting from './pages/GarmentCosting';
 import SustainabilityCompliance from './pages/SustainabilityCompliance';
+import VerifyEmail from './pages/VerifyEmail';
 
 function Layout() {
   const { isAuthenticated, loading } = useApp();
@@ -32,6 +33,9 @@ function Layout() {
         <main className="flex-1 overflow-y-auto p-6">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/admin-dashboard" element={<Dashboard />} />
+            <Route path="/employee-dashboard" element={<Dashboard />} />
+            <Route path="/customer-dashboard" element={<Dashboard />} />
             <Route path="/tech-pack-bom" element={<TechPackBOM />} />
             <Route path="/batch-tracking" element={<BatchTracking />} />
             <Route path="/quality-control" element={<QualityControl />} />
@@ -56,6 +60,10 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/verify-email/:token" element={<VerifyEmail />} />
+      <Route path="/admin-dashboard" element={<Layout />} />
+      <Route path="/employee-dashboard" element={<Layout />} />
+      <Route path="/customer-dashboard" element={<Layout />} />
       <Route path="/*" element={<Layout />} />
     </Routes>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Factory, Eye, EyeOff, Lock, Mail } from 'lucide-react';
@@ -11,24 +11,36 @@ export default function Login() {
   const [role, setRole] = useState('employee');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, register, isAuthenticated } = useApp();
+  const { login, register, isAuthenticated, user, getRoleDashboard } = useApp();
   const navigate = useNavigate();
 
-  if (isAuthenticated) { navigate('/'); return null; }
+  useEffect(() => {
+    if (isAuthenticated && user?.role) {
+      navigate(getRoleDashboard(user.role), { replace: true });
+    }
+  }, [isAuthenticated, navigate, user?.role]);
 
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError('');
+  setSuccess('');
   setLoading(true);
   try {
     if (isRegister) { 
-      await register(name, email, password, role); 
+      const message = await register(name, email, password, role);
+      setSuccess(message || 'Account created. Check your email to verify your account.');
+      setIsRegister(false);
+      setName('');
+      setPassword('');
+      return;
     }
-    else { 
-      await login(email, password); 
+    else {
+      const loggedInUser = await login(email, password);
+      navigate(getRoleDashboard(loggedInUser.role), { replace: true });
+      return;
     }
-    navigate('/');
   } catch (err) {
     console.error('LOGIN ERROR:', err);
     console.error('Response:', err.response);
@@ -54,6 +66,9 @@ export default function Login() {
           <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">{isRegister ? 'Create Account' : 'Sign In'}</h2>
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center">{error}</div>
+          )}
+          {success && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm text-center">{success}</div>
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
             {isRegister && (
@@ -84,8 +99,8 @@ export default function Login() {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Role</label>
                 <select value={role} onChange={e => setRole(e.target.value)} className="input-field">
                   <option value="employee">Employee</option>
+                  <option value="customer">Customer</option>
                   <option value="manager">Manager</option>
-                  <option value="admin">Admin</option>
                 </select>
               </div>
             )}
