@@ -1,17 +1,21 @@
 import axios from 'axios';
 
 const getApiUrl = () => {
-  if (import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.includes('abasthan.app')) {
-    return import.meta.env.VITE_API_URL;
-  }
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') {
-      return 'http://localhost:5000/api';
+      return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     }
+
+    const configuredUrl = import.meta.env.VITE_API_URL;
+    if (configuredUrl && !configuredUrl.includes('localhost') && !configuredUrl.includes('127.0.0.1')) {
+      return configuredUrl;
+    }
+
+    return 'https://textile-erp-backend-orpin.vercel.app/api';
   }
-  // Production fallback: relative /api endpoint on the deployed domain
-  return '/api';
+
+  return import.meta.env.VITE_API_URL || 'https://textile-erp-backend-orpin.vercel.app/api';
 };
 
 const api = axios.create({
