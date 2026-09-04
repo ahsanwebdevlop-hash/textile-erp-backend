@@ -1,21 +1,26 @@
 import axios from 'axios';
 
+const normalizeApiUrl = (url) => {
+  const normalizedUrl = url.replace(/\/$/, '');
+  return normalizedUrl.endsWith('/api') ? normalizedUrl : `${normalizedUrl}/api`;
+};
+
 const getApiUrl = () => {
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') {
-      return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      return normalizeApiUrl(import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
     }
 
     const configuredUrl = import.meta.env.VITE_API_URL;
     if (configuredUrl && !configuredUrl.includes('localhost') && !configuredUrl.includes('127.0.0.1')) {
-      return configuredUrl;
+      return normalizeApiUrl(configuredUrl);
     }
 
     return 'https://textile-erp-backend-orpin.vercel.app/api';
   }
 
-  return import.meta.env.VITE_API_URL || 'https://textile-erp-backend-orpin.vercel.app/api';
+  return normalizeApiUrl(import.meta.env.VITE_API_URL || 'https://textile-erp-backend-orpin.vercel.app/api');
 };
 
 const api = axios.create({
